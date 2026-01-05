@@ -1,8 +1,8 @@
 "use server";
 
 import { Octokit } from "octokit";
-import { auth } from "../src/lib/auth";
-import client from "../src/lib/db";
+import { auth } from "@/lib/auth";
+import client from "@/lib/db";
 import { headers } from "next/headers";
 
 export const getGithubToken = async () => {
@@ -30,7 +30,7 @@ export const getGithubToken = async () => {
 
 interface ContributionData {
     user: {
-        contributionCollection: {
+        contributionsCollection: {
             contributionCalendar: {
                 totalContributions: number,
                 weeks: {
@@ -49,15 +49,17 @@ export async function fetchUserContribution(token: string, username: string) {
     const octokit = new Octokit({ auth: token });
 
     const query = `
-    query($username:String!){
-        user(login:$username){
-            contributionCollection{
-                totalContributions
-                weeks{
-                    contributionDays{
-                        contributionCount
-                        date
-                        color
+    query($username: String!){
+        user(login: $username){
+            contributionsCollection{
+                contributionCalendar{
+                    totalContributions
+                    weeks{
+                        contributionDays{
+                            contributionCount
+                            date
+                            color
+                        }
                     }
                 }
             }
@@ -67,10 +69,10 @@ export async function fetchUserContribution(token: string, username: string) {
 
     try {
         const response: ContributionData = await octokit.graphql(query, {
-            username
+            username: username
         });
 
-        return response.user.contributionCollection.contributionCalendar;
+        return response.user.contributionsCollection.contributionCalendar;
     } catch (e) {
         console.log(e)
     }
