@@ -30,14 +30,17 @@ const AppHeader = () => {
                                 Home
                             </BreadcrumbLink>
                         </BreadcrumbItem>
-                        {pathname.map((v, idx: number) => (
+                        {/* {pathname.map((v, idx: number) => (
                             <div key={idx} className="flex justify-center items-center gap-2">
                                 <BreadcrumbSeparator className="hidden md:block" />
                                 <BreadcrumbItem>
                                     <BreadcrumbPage>{v[0].toUpperCase() + v.slice(1)}</BreadcrumbPage>
                                 </BreadcrumbItem>
                             </div>
-                        ))}
+                        ))} */}
+                        <BreadcrumbItem>
+                            <BreadcrumbPage>{pathname[pathname?.length - 1]?.[0].toUpperCase() + pathname[pathname?.length - 1].slice(1)}</BreadcrumbPage>
+                        </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
             </div>
