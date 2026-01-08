@@ -4,9 +4,9 @@ import { RepositoryListSkeleton } from "@/components/repository/repository-list-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useRepositories } from "@/hooks/query/repository";
+import { useConnectRepository, useRepositories } from "@/hooks/query/repository";
 import { cn } from "@/lib/utils";
-import { ExternalLink, Search, Star } from "lucide-react";
+import { ClockFading, ExternalLink, Search, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface Repository {
@@ -23,6 +23,8 @@ interface Repository {
 
 const Repository = () => {
     const { data, isPending, isError, fetchNextPage, hasNextPage, isFetchingNextPage } = useRepositories();
+
+    const { mutate: connectRepo } = useConnectRepository();
 
     const [localConnectingId, setLocalConnctingId] = useState<number | null>(null);
 
@@ -63,8 +65,17 @@ const Repository = () => {
         repo.name.toLowerCase().includes(searchQuery.toLowerCase()) || repo.full_name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const handleConnect = (repo: any) => {
-
+    const handleConnect = (repo: Repository) => {
+        setLocalConnctingId(repo?.id);
+        connectRepo({
+            owner: repo.full_name.split("/")[0],
+            githubId: repo?.id,
+            repo: repo?.name
+        }, {
+            onSettled: () => {
+                setLocalConnctingId(null);
+            }
+        })
     }
 
     if (isPending) {
@@ -84,6 +95,8 @@ const Repository = () => {
     if (isError) {
         return <div>Failed to load repository</div>
     }
+
+    console.log(filteredRepositories)
 
     return (
         <div className="flex flex-1 flex-col gap-4 p-4">
@@ -116,7 +129,7 @@ const Repository = () => {
                                                     {repo?.name}
                                                 </CardTitle>
                                                 <Button variant={"ghost"}>{repo?.language || "Unknow"}</Button>
-                                                {repo.isConnected && <Button variant={"secondary"}>Connected</Button>}
+                                                {repo.isConnected && <Button variant={"ghost"} className="rounded-2xl px-4 text-yellow-500 bg-yellow-400/10 hover:bg-yellow-400/50 hover:text-yellow-500">Connected</Button>}
                                             </div>
                                             <CardDescription>{repo.description}</CardDescription>
                                         </div>
@@ -132,7 +145,7 @@ const Repository = () => {
                                                 disabled={localConnectingId === repo.id || repo.isConnected}
                                                 variant={repo.isConnected ? "outline" : "default"}
                                             >
-                                                {localConnectingId === repo.id ? "connecting..." : repo.isConnected ? "Connected" : "Connected"}
+                                                {localConnectingId === repo.id ? "connecting..." : repo.isConnected ? "Connected" : "Connect"}
                                             </Button>
                                         </div>
                                     </div>

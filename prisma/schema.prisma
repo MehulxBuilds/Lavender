@@ -6,6 +6,12 @@ datasource db {
   provider = "postgresql"
 }
 
+model Test  {
+  id String @id @default(uuid())
+  name String
+  salary String
+}
+
 model User {
   id            String       @id
   name          String

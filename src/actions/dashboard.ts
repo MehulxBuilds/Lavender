@@ -210,4 +210,4 @@ export async function getMonthlyActivity() {
         console.error("Error fetching monthly activity:", e);
         return [];
     }
-}
+};
