@@ -1,10 +1,12 @@
+"use client";
+
 import { connectRepository, fetchRepositories } from "@/actions/repository";
 import { disconnectAllRepository, disconnectRepository, getConnectedRepositories } from "@/actions/settings";
 import { useDisconnectAllRepoState } from "@/store/repository";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-const { disconnectAllOpen, setDisconnectAllOpen } = useDisconnectAllRepoState();
+
 
 export const useRepositories = () => {
     return useInfiniteQuery({
@@ -52,7 +54,7 @@ export const useDisconnectRepositories = () => {
     return useMutation({
         mutationFn: async (repositoryId: string) => await disconnectRepository(repositoryId),
         onSuccess: (result) => {
-            if (!result?.success) {
+            if (result?.success) {
                 queryClient.invalidateQueries({ queryKey: ["connected-repository"] });
                 queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] }),
                     toast.success("Repository disconnected successfully")
@@ -65,11 +67,12 @@ export const useDisconnectRepositories = () => {
 
 export const useDisconnectAllRepositories = () => {
     const queryClient = useQueryClient();
+    const { setDisconnectAllOpen } = useDisconnectAllRepoState();
 
     return useMutation({
         mutationFn: async () => await disconnectAllRepository(),
         onSuccess: (result) => {
-            if (!result?.success) {
+            if (result?.success) {
                 queryClient.invalidateQueries({ queryKey: ["connected-repository"] });
                 queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] }),
                     toast.success(`${result?.count} Repository disconnected successfully`);

@@ -1,3 +1,5 @@
+"use client";
+
 import { useDisconnectAllRepositories, useDisconnectRepositories, useGetAllConnectedRepositories } from '@/hooks/query/repository';
 import { useDisconnectAllRepoState } from '@/store/repository';
 import React from 'react'
