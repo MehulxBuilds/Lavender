@@ -1,6 +1,10 @@
 import { connectRepository, fetchRepositories } from "@/actions/repository";
+import { disconnectAllRepository, disconnectRepository, getConnectedRepositories } from "@/actions/settings";
+import { useDisconnectAllRepoState } from "@/store/repository";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
+const { disconnectAllOpen, setDisconnectAllOpen } = useDisconnectAllRepoState();
 
 export const useRepositories = () => {
     return useInfiniteQuery({
@@ -29,6 +33,50 @@ export const useConnectRepository = () => {
         onError: (error) => {
             console.error(error);
             toast.error("Failed to connect repository");
+        }
+    })
+};
+
+export const useGetAllConnectedRepositories = () => {
+    return useQuery({
+        queryKey: ['connected-repository'],
+        queryFn: async () => await getConnectedRepositories(),
+        staleTime: 1000 * 60 * 2,
+        refetchOnWindowFocus: false,
+    })
+};
+
+export const useDisconnectRepositories = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (repositoryId: string) => await disconnectRepository(repositoryId),
+        onSuccess: (result) => {
+            if (!result?.success) {
+                queryClient.invalidateQueries({ queryKey: ["connected-repository"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] }),
+                    toast.success("Repository disconnected successfully")
+            } else {
+                toast.error(result.error || "Failed to disconnect repository");
+            }
+        }
+    })
+};
+
+export const useDisconnectAllRepositories = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => await disconnectAllRepository(),
+        onSuccess: (result) => {
+            if (!result?.success) {
+                queryClient.invalidateQueries({ queryKey: ["connected-repository"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] }),
+                    toast.success(`${result?.count} Repository disconnected successfully`);
+                setDisconnectAllOpen(false);
+            } else {
+                toast.error(result.error || "Failed to disconnect repositories");
+            }
         }
     })
 };
