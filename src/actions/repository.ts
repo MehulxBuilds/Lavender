@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import client from "@/lib/db";
 import { createWebhook, getRepository } from "./github";
 import { headers } from "next/headers";
+import { inngest } from "@/inngest/client";
 
 export const fetchRepositories = async (page: number = 1, perPage = 10) => {
     const session = await auth.api.getSession({
@@ -30,7 +31,7 @@ export const fetchRepositories = async (page: number = 1, perPage = 10) => {
     }));
 }
 
-export const connectRepository = async(owner: string, repo: string, githubId: number) => {
+export const connectRepository = async (owner: string, repo: string, githubId: number) => {
     const session = await auth.api.getSession({
         headers: await headers()
     });
@@ -43,14 +44,14 @@ export const connectRepository = async(owner: string, repo: string, githubId: nu
 
     const webhook = await createWebhook(owner, repo);
 
-    if(webhook) {
+    if (webhook) {
         await client.repository.create({
             data: {
                 githubId: BigInt(githubId),
                 name: repo,
                 owner,
                 fullName: `${owner}/${repo}`,
-                url: `http:/github.com/${owner}/${repo}`,
+                url: `https:/github.com/${owner}/${repo}`,
                 userId: session.user.id,
             }
         })
@@ -58,7 +59,20 @@ export const connectRepository = async(owner: string, repo: string, githubId: nu
 
     // TODO: inc. repo count
 
-    // TODO: Trigger repo index
+    // Trigger repo index
+
+    try {
+        await inngest.send({
+            name: "repository.connected",
+            data: {
+                owner,
+                repo,
+                userId: session.user.id,
+            }
+        })
+    } catch (e) {
+        console.error("Failed to trigger repository indexing:", e);
+    }
 
     return webhook;
 }
