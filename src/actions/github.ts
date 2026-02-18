@@ -207,3 +207,40 @@ export const getRepoFileContents = async (token: string, owner: string, repo: st
 
     return files;
 };
+
+export const getpullRequestDiff = async (token: string, owner: string, repo: string, prNumber: number) => {
+    const octokit = new Octokit({ auth: token });
+
+    const { data } = await octokit.rest.pulls.get({
+        owner,
+        repo,
+        pull_number: prNumber,
+    });
+
+    const { data: diff } = await octokit.rest.pulls.get({
+        owner,
+        repo,
+        pull_number: prNumber,
+        mediaType: {
+            format: "diff"
+        }
+    });
+
+    return {
+        diff: diff as unknown as string,
+        title: data.title,
+        description: data.body || "",
+        token,
+    }
+};
+
+export const postReviewComment = async (token: string, owner: string, repo: string, prNumber: number, review: string) => {
+    const octokit = new Octokit({ auth: token });
+
+    await octokit.rest.issues.createComment({
+        owner,
+        repo,
+        issue_number: prNumber,
+        body: `## AI Code Review\n\n${review}\n\n---\n*Powered by Lavender*`,
+    });
+};
