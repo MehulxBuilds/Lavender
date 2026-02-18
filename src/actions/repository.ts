@@ -5,6 +5,7 @@ import client from "@/lib/db";
 import { createWebhook, getRepository } from "./github";
 import { headers } from "next/headers";
 import { inngest } from "@/inngest/client";
+import { canConnectRepository, incrementRepositoryCount } from "@/lib/subscription";
 
 export const fetchRepositories = async (page: number = 1, perPage = 10) => {
     const session = await auth.api.getSession({
@@ -41,6 +42,11 @@ export const connectRepository = async (owner: string, repo: string, githubId: n
     };
 
     // TODO: Check if user can connect more repo.
+    const canConnect = await canConnectRepository(session.user.id);
+
+    if (!canConnect) {
+        throw new Error("Repository connection limit reached. Please upgrade your plan to connect more repositories.");
+    }
 
     const webhook = await createWebhook(owner, repo);
 
@@ -55,24 +61,25 @@ export const connectRepository = async (owner: string, repo: string, githubId: n
                 userId: session.user.id,
             }
         })
+
+        // TODO: inc. repo count
+        await incrementRepositoryCount(session.user.id);
+
+        // Trigger repo indexing
+        try {
+            await inngest.send({
+                name: "repository.connected",
+                data: {
+                    owner,
+                    repo,
+                    userId: session.user.id,
+                }
+            })
+        } catch (e) {
+            console.error("Failed to trigger repository indexing:", e);
+        }
+
     };
-
-    // TODO: inc. repo count
-
-    // Trigger repo index
-
-    try {
-        await inngest.send({
-            name: "repository.connected",
-            data: {
-                owner,
-                repo,
-                userId: session.user.id,
-            }
-        })
-    } catch (e) {
-        console.error("Failed to trigger repository indexing:", e);
-    }
 
     return webhook;
 }

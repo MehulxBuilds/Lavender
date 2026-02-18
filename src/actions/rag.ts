@@ -4,6 +4,7 @@ import { google } from "@ai-sdk/google";
 import client from "@/lib/db";
 import { getpullRequestDiff } from "./github";
 import { inngest } from "@/inngest/client";
+import { canCreateReview, incrementReviewCount } from "@/lib/subscription";
 
 export const generateEmbedding = async (text: string) => {
     const { embedding } = await embed({
@@ -78,7 +79,6 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
 
     try {
 
-
         const repository = await client.repository.findFirst({
             where: {
                 owner,
@@ -101,6 +101,12 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
             throw new Error(`Repository ${owner}/${repo} not found in database, Please reconnect the repository.`);
         };
 
+        const canReview = await canCreateReview(repository.user.id, repository.id);
+
+        if (!canReview) {
+            throw new Error(`Review limit reached for this repository. Please upgrade your plan to continue receiving reviews.`);
+        }
+
         const githubAccount = repository?.user?.accounts?.[0];
 
         if (!githubAccount?.accessToken) {
@@ -118,9 +124,10 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
                 repo,
                 prNumber,
                 userId: repository.user.id,
-                title,
             }
         });
+
+        await incrementReviewCount(repository.user.id, repository.id);
 
         return {
             success: true,
