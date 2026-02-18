@@ -1,3 +1,4 @@
+import { reviewPullRequest } from "@/actions/rag";
 import { NextResponse, NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -11,6 +12,25 @@ export async function POST(req: NextRequest) {
             }, {
                 status: 200
             });
+        };
+
+        if (event === "pull_request") {
+            const action = body.action;
+            const repo = body.repository.full_name;
+            const prNumber = body.number;
+
+            const [owner, repoName] = repo.split("/");
+
+            if (action === "opened" || action === "synchronize") {
+                reviewPullRequest(owner, repoName, prNumber)
+                    .then(() => {
+                        console.log(`Review completed for ${repo} #${prNumber}`);
+                    })
+                    .catch((err: any) => {
+                        console.error(`Review Failed PR ${repo} #${prNumber}:`, err);
+                    }
+                );
+            }
         };
 
         // TODO: Handle PR later!
