@@ -20,6 +20,8 @@ export const auth = betterAuth({
         }
     },
 
+    trustedOrigins: [process.env.NEXT_PUBLIC_APP_BASE_URL!],
+
     plugins: [
         polar({
             client: polarClient,
@@ -28,15 +30,15 @@ export const auth = betterAuth({
                 checkout({
                     products: [
                         {
-                            productId: "207870f2-f1bb-4f96-9b7d-1eaae7268769",
-                            slug: "Lavendar", // Custom slug for easy reference in Checkout URL, e.g. /checkout/a-new-saas
+                            productId: "d777e3e8-fc3a-46db-94ff-0282b391d053",
+                            slug: "pro", // Custom slug for easy reference in Checkout URL, e.g. /checkout/a-new-saas
                         },
                     ],
-                    successUrl: process.env.POLAR_SUCCESS_URL,
+                    successUrl: process.env.POLAR_SUCCESS_URL || "/dashboard/subscription?success=true",
                     authenticatedUsersOnly: true,
                 }),
                 portal({
-                    returnUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000/dashboard",
+                    returnUrl: process.env.PORTAL_RETURN_URL || "http://localhost:3000/dashboard",
                 }),
                 usage(),
                 webhooks({

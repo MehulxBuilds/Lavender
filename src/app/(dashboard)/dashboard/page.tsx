@@ -5,14 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Spinner } from "@/components/ui/spinner";
 import { useDashboardStats, useMonthlyActivity } from "@/hooks/query/dashboard";
 import { GitBranch } from "lucide-react";
-import { useState } from "react";
+import { useTheme } from "next-themes";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const DashboardPage = () => {
     const { data: stats, isPending: isPendingStats } = useDashboardStats();
     const { data: monthlyActivity, isPending: isPendingActivity } = useMonthlyActivity();
-
-    console.log(monthlyActivity)
+    const { theme } = useTheme();
 
     return (
         <div className="flex flex-1 flex-col gap-4 p-4">
@@ -106,9 +105,9 @@ const DashboardPage = () => {
                                             itemStyle={{ color: 'var(--foreground)' }}
                                         />
                                         <Legend />
-                                        <Bar dataKey="commits" name="Commits" radius={[4, 4, 0, 0]} />
-                                        <Bar dataKey="prs" name="Prs" radius={[4, 4, 0, 0]} />
-                                        <Bar dataKey="reviews" name="Ai reviews" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="commits" name="Commits" radius={[4, 4, 0, 0]} fill={`${theme === 'dark' ? '#8B5CF6' : '#6366F1'}`} />
+                                        <Bar dataKey="prs" name="Prs" radius={[4, 4, 0, 0]} fill={`${theme === 'dark' ? '#10B981' : '#059669'}`} />
+                                        <Bar dataKey="reviews" name="Ai reviews" radius={[4, 4, 0, 0]} fill={`${theme === 'dark' ? '#F59E0B' : '#D97706'}`} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
