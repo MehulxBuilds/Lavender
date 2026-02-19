@@ -122,11 +122,11 @@ Lavendar follows a **Modular Monolith** architecture where core domains (Auth, B
 
 ### System Diagram ( Current )
 
-![System Architecture](./assets/system_diagram.png)
+![System Architecture](./public/assets/system_diagram.png)
 
 ### System Diagram ( Future )
 
-![System Architecture](./assets/system_diagram_future.png)
+![System Architecture](./public/assets/system_diagram_future.png)
 
 ---
 
