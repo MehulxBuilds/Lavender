@@ -1,6 +1,6 @@
 "use server";
 import { auth } from "@/lib/auth";
-import { getRemainingLimits, updateUserTier } from "@/lib/subscription";
+import { getRemainingLimits, updateUserTier, updatePolarCustomerId } from "@/lib/subscription";
 import { headers } from "next/headers";
 import { polarClient } from "@/lib/polar";
 import client from "@/lib/db";
@@ -74,15 +74,31 @@ export async function syncSubscriptionStatus() {
         throw new Error("Not authenticated");
     }
 
-    const user = await client.user.findUnique({
+    let user = await client.user.findUnique({
         where: { id: session.user.id }
     });
 
-    if (!user || !user.polarCustomerId) {
-        return { success: false, message: "No Polar customer ID found" };
+    if (!user) {
+        return { success: false, message: "User not found" };
     }
 
     try {
+        // If polarCustomerId is missing, try to look up the Polar customer by email
+        if (!user.polarCustomerId) {
+            const customers = await polarClient.customers.list({
+                email: user.email,
+            });
+
+            const polarCustomer = customers.result?.items?.[0];
+
+            if (polarCustomer) {
+                await updatePolarCustomerId(user.id, polarCustomer.id);
+                user = { ...user, polarCustomerId: polarCustomer.id };
+            } else {
+                return { success: false, message: "No Polar customer found for this email" };
+            }
+        }
+
         // Fetch subscriptions from Polar
         const result = await polarClient.subscriptions.list({
             customerId: user.polarCustomerId,

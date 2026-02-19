@@ -184,7 +184,7 @@ export async function updateUserTier(
         data: {
             subscriptionTier: tier,
             subscriptionStatus: status,
-          
+            polarSubscriptionId: polarSubscriptionId || null,
         },
     });
 }

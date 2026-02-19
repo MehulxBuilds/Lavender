@@ -13,6 +13,7 @@ import { toast } from "sonner"
 import Link from "next/link"
 import { usePayments } from "@/hooks/query/payments"
 import { Spinner } from "@/components/ui/spinner"
+import { syncSubscriptionStatus } from "@/actions/payments"
 
 const PLAN_FEATURES = {
   free: [
@@ -41,6 +42,33 @@ const SubscriptionPage = () => {
   const success = searchParams.get("success")
 
   const { data, isPending, isError, refetch } = usePayments();
+
+  useEffect(() => {
+    if (success === "true") {
+      const Sync = async () => {
+        try {
+          setSyncLoading(true);
+
+          const result = await syncSubscriptionStatus();
+
+          if (result.success) {
+            toast.success("Subscription status synced successfully");
+            refetch();
+          } else {
+            toast.error("Failed to sync subscription status");
+          }
+        } catch (e) {
+          console.error(e);
+          toast.error("An error occurred while syncing subscription status");
+        } finally {
+          setSyncLoading(false);
+        }
+      };
+
+      Sync();
+    };
+
+  }, [success, refetch]);
 
   if (isPending) {
     return (
@@ -95,7 +123,52 @@ const SubscriptionPage = () => {
   const isPro = currentTier === "PRO";
   const isActive = data.user.subscriptionStatus === "ACTIVE";
 
-  const handleSync = () => { }
+  const handleSync = async () => {
+    try {
+      setSyncLoading(true);
+
+      const result = await syncSubscriptionStatus();
+
+      if (result.success) {
+        toast.success("Subscription status synced successfully");
+        refetch();
+      } else {
+        toast.error("Failed to sync subscription status");
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("An error occurred while syncing subscription status");
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    try {
+      setCheckoutLoading(true)
+
+      await checkout({
+        slug: "pro",
+      })
+    } catch (e) {
+      console.error(e)
+      toast.error("Failed to initiate checkout")
+    } finally {
+      setCheckoutLoading(false)
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      setPortalLoading(true)
+      await customer.portal();
+    } catch (e) {
+      console.error(e)
+      toast.error("Failed to open customer portal")
+    } finally {
+      setPortalLoading(false)
+    }
+  };
 
   return (
     <div className="space-y-6 p-6">
@@ -170,7 +243,138 @@ const SubscriptionPage = () => {
         </Card>
       )}
 
-      
+      {/* Plans */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Free Plan */}
+        <Card className={!isPro ? "ring-2 ring-primary" : ""}>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>Free</CardTitle>
+                <CardDescription>Perfect for getting started</CardDescription>
+              </div>
+              {!isPro && <Badge className="ml-2">Current Plan</Badge>}
+            </div>
+
+            <div className="mt-2">
+              <span className="text-3xl font-bold">$0</span>
+              <span className="text-muted-foreground">/month</span>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              {PLAN_FEATURES.free.map((feature) => (
+                <div
+                  key={feature.name}
+                  className="flex items-center gap-2"
+                >
+                  {feature.included ? (
+                    <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                  ) : (
+                    <X className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      feature.included ? "" : "text-muted-foreground"
+                    }
+                  >
+                    {feature.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              className="w-full"
+              variant="outline"
+              disabled
+            >
+              {isPro ? "Current Plan" : "Downgrade"}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Pro Plan */}
+        <Card className={isPro ? "ring-2 ring-primary" : ""}>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>Pro</CardTitle>
+                <CardDescription>
+                  For professional developers
+                </CardDescription>
+              </div>
+              {isPro && <Badge className="ml-2">Current Plan</Badge>}
+            </div>
+
+            <div className="mt-2">
+              <span className="text-3xl font-bold">$99.99</span>
+              <span className="text-muted-foreground">/month</span>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              {PLAN_FEATURES.pro.map((feature) => (
+                <div
+                  key={feature.name}
+                  className="flex items-center gap-2"
+                >
+                  {feature.included ? (
+                    <Check className="h-4 w-4 text-primary shrink-0" />
+                  ) : (
+                    <X className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  )}
+                  <span
+                    className={
+                      feature.included ? "" : "text-muted-foreground"
+                    }
+                  >
+                    {feature.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {isPro && isActive ? (
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={handleManageSubscription}
+                disabled={portalLoading}
+              >
+                {portalLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Opening Portal...
+                  </>
+                ) : (
+                  <>
+                    Manage Subscription
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                className="w-full"
+                onClick={handleUpgrade}
+                disabled={checkoutLoading}
+              >
+                {checkoutLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading Checkout...
+                  </>
+                ) : (
+                  "Upgrade to Pro"
+                )}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
     </div>
   )
