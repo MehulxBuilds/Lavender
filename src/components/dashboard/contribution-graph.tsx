@@ -24,6 +24,11 @@ const ContributionGraph = () => {
         )
     }
 
+    const formattedContributions = data.contributions.map(contribution => ({
+        ...contribution,
+        date: typeof contribution.date === 'string' ? contribution.date : contribution.date.toISOString().split('T')[0]
+    }));
+
     return (
         <div className="w-full flex flex-col items-center gap-4 p-4">
             <div className="text-sm text-muted-foreground">
@@ -33,7 +38,7 @@ const ContributionGraph = () => {
             <div className="w-full overflow-x-auto">
                 <div className="flex justify-center min-w-max px-4">
                     <ActivityCalendar
-                        data={data.contributions}
+                        data={formattedContributions}
                         colorScheme={theme === "dark" ? "dark" : "light"}
                         blockSize={11}
                         blockMargin={4}
