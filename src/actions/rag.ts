@@ -115,7 +115,7 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
 
         const token = githubAccount?.accessToken;
 
-        const { title } = await getpullRequestDiff(token, owner, repo, prNumber);
+        await getpullRequestDiff(token, owner, repo, prNumber);
 
         await inngest.send({
             name: "pr.review.requested",

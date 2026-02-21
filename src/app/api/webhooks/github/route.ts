@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
                     .then(() => {
                         console.log(`Review completed for ${repo} #${prNumber}`);
                     })
-                    .catch((err: any) => {
+                    .catch((err: unknown) => {
                         console.error(`Review Failed PR ${repo} #${prNumber}:`, err);
                     }
                 );

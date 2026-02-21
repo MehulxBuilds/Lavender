@@ -1,48 +1,23 @@
 "use client"
 
 import { useGetUserProfile, useUpdateUserProfile } from '@/hooks/query/settings';
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 
-const ProfileForm = () => {
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
+function ProfileFormFields({ initialName, initialEmail }: { initialName: string; initialEmail: string }) {
+    const [name, setName] = useState(initialName);
+    const [email, setEmail] = useState(initialEmail);
 
-    const { data: profile, isPending } = useGetUserProfile();
     const { mutate, isPending: isUpdatePending } = useUpdateUserProfile();
-
-    useEffect(() => {
-        if (profile) {
-            setName(profile?.name ?? "");
-            setEmail(profile?.email ?? "");
-        }
-    }, [profile]);
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         mutate({ name, email });
     };
-
-    if (isPending || isUpdatePending) {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Profile Settings</CardTitle>
-                    <CardDescription>update your profile information</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className='animate-pulse space-y-4'>
-                        <div className='h-10 bg-muted rounded'></div>
-                        <div className='h-10 bg-muted rounded'></div>
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
 
     return (
         <Card>
@@ -81,6 +56,35 @@ const ProfileForm = () => {
                 </form>
             </CardContent>
         </Card>
+    )
+}
+
+const ProfileForm = () => {
+    const { data: profile, isPending } = useGetUserProfile();
+
+    if (isPending) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Profile Settings</CardTitle>
+                    <CardDescription>update your profile information</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className='animate-pulse space-y-4'>
+                        <div className='h-10 bg-muted rounded'></div>
+                        <div className='h-10 bg-muted rounded'></div>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+    }
+
+    return (
+        <ProfileFormFields
+            key={profile?.id}
+            initialName={profile?.name ?? ""}
+            initialEmail={profile?.email ?? ""}
+        />
     )
 }
 

@@ -29,9 +29,8 @@ export async function getContributionStats() {
             return null;
         }
 
-        // @ts-ignore
-        const contributions = calendar?.weeks?.flatMap((week: any) =>
-            week.contributionDays.map((day: any) => ({
+        const contributions = calendar?.weeks?.flatMap((week) =>
+            week.contributionDays.map((day) => ({
                 date: day.date,
                 count: day.contributionCount,
                 level: Math.min(4, Math.floor(day.contributionCount / 3)), // Convert to 0-4 scale
@@ -144,8 +143,9 @@ export async function getMonthlyActivity() {
             monthlyData[monthKey] = { commits: 0, prs: 0, reviews: 0 };
         }
 
-        Object.values(calendar?.weeks || {}).forEach((week: any) => {
-            week.contributionDays.forEach((day: any) => {
+
+        (calendar?.weeks || []).forEach((week) => {
+            week.contributionDays.forEach((day) => {
                 const date = new Date(day.date);
                 const monthKey = monthNames[date.getMonth()];
                 if (monthlyData[monthKey]) {
@@ -193,7 +193,7 @@ export async function getMonthlyActivity() {
             per_page: 100,
         });
 
-        prs.items.forEach((pr: any) => {
+        prs.items.forEach((pr: { created_at: string }) => {
             const date = new Date(pr.created_at);
             const monthKey = monthNames[date.getMonth()];
             if (monthlyData[monthKey]) {

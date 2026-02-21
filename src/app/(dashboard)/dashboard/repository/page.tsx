@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { useConnectRepository, useRepositories } from "@/hooks/query/repository";
 import { cn } from "@/lib/utils";
-import { ClockFading, ExternalLink, Search, Star } from "lucide-react";
+import { ExternalLink, Search, Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface Repository {
@@ -116,7 +116,7 @@ const Repository = () => {
 
                 <div className="grid gap-4">
                     {
-                        filteredRepositories.map((repo: any) => (
+                        filteredRepositories.map((repo: Repository) => (
                             <Card key={repo?.id} className="hover:shadow-md transition-shadow">
                                 <CardHeader>
 

@@ -1,5 +1,5 @@
 import { getContributionStats, getDashboardStats, getMonthlyActivity } from "@/actions/dashboard";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export const useDashboardStats = () => {
     return useQuery({

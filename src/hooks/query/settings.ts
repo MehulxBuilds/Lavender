@@ -18,8 +18,8 @@ export const useUpdateUserProfile = () => {
     return useMutation({
         mutationFn: async (data: { name: string, email: string }) => await updateUserProfile(data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['user-profile'] }),
-                toast.success("Profile updated successfully")
+            queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+            toast.success("Profile updated successfully");
         },
         onError: () => {
             toast.error("Failed to update profile")

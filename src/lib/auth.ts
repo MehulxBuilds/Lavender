@@ -5,7 +5,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import client from "./db";
 import { polar, checkout, portal, usage, webhooks } from "@polar-sh/better-auth";
 import { polarClient } from "./polar";
-import { updatePolarCustomerId, updateUserTier } from "./subscription";
+import { SubscriptionTier, updatePolarCustomerId, updateUserTier } from "./subscription";
 
 export const auth = betterAuth({
     database: prismaAdapter(client, {
@@ -66,7 +66,7 @@ export const auth = betterAuth({
                         })
 
                         if (user) {
-                            return updateUserTier(user.id, user.subscriptionTier as any, "CANCELED");
+                            return updateUserTier(user.id, user.subscriptionTier as SubscriptionTier, "CANCELED");
                         }
                     },
                     onSubscriptionRevoked: async (payload) => {
