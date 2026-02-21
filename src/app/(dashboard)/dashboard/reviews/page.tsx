@@ -10,11 +10,11 @@ import { RepositoryListSkeleton } from "@/components/repository/repository-list-
 
 interface Review {
     id: string;
-    prTitle: string;
+    prTitle: string | null;
     status: string;
     prNumber: number;
     prUrl: string;
-    createdAt: string;
+    createdAt: Date;
     review: string;
     repository: { fullName: string };
 }

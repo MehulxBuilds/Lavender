@@ -18,7 +18,7 @@ interface Repository {
     stargazers_count: number,
     language: string | null,
     topics?: string[],
-    inConnected?: boolean
+    isConnected?: boolean
 };
 
 const Repository = () => {
