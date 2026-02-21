@@ -5,7 +5,6 @@ import client from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { deleteWebhook } from "./github";
-import { count } from "console";
 
 export const getUserProfile = async () => {
     try {

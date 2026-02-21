@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react"
-import { GalleryVerticalEnd, GithubIcon } from "lucide-react"
+import { GithubIcon } from "lucide-react"
 
 import {
   Sidebar,
@@ -51,21 +51,11 @@ const data = {
   ],
 };
 
-interface UserProps {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  email: string;
-  emailVerified: boolean;
-  name: string;
-  image?: string | null | undefined;
-}
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname().split('/').filter(Boolean);
   const currentPath = pathname[pathname.length - 1];
 
-  const { data: user, isPending } = useRequireAuth();
+  const { data: user } = useRequireAuth();
 
   return (
     <Sidebar {...props}>

@@ -38,8 +38,8 @@ interface ContributionData {
                         contributionCount: number,
                         date: string | Date,
                         color: string
-                    }
-                }
+                    }[]
+                }[]
             }
         }
     }
@@ -178,7 +178,7 @@ export const getRepoFileContents = async (token: string, owner: string, repo: st
 
     let files: { path: string, content: string }[] = [];
 
-    for (let item of data) {
+    for (const item of data) {
 
         if (item.type === "file") {
             const { data: fileData } = await octokit.rest.repos.getContent({

@@ -56,8 +56,8 @@ export const useDisconnectRepositories = () => {
         onSuccess: (result) => {
             if (result?.success) {
                 queryClient.invalidateQueries({ queryKey: ["connected-repository"] });
-                queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] }),
-                    toast.success("Repository disconnected successfully")
+                queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+                toast.success("Repository disconnected successfully");
             } else {
                 toast.error(result.error || "Failed to disconnect repository");
             }
@@ -74,8 +74,8 @@ export const useDisconnectAllRepositories = () => {
         onSuccess: (result) => {
             if (result?.success) {
                 queryClient.invalidateQueries({ queryKey: ["connected-repository"] });
-                queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] }),
-                    toast.success(`${result?.count} Repository disconnected successfully`);
+                queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+                toast.success(`${result?.count} Repository disconnected successfully`);
                 setDisconnectAllOpen(false);
             } else {
                 toast.error(result.error || "Failed to disconnect repositories");

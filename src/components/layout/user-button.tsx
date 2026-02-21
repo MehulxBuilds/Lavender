@@ -28,7 +28,6 @@ interface UserData {
 
 interface UserButtonProps {
     user: UserData | null;
-    onLogout?: () => void | Promise<void>;
     onSettings?: () => void;
     onProfile?: () => void;
     onBilling?: () => void;
@@ -42,7 +41,6 @@ interface UserButtonProps {
 
 export default function UserButton({
     user,
-    onLogout,
     onSettings,
     onProfile,
     onBilling,

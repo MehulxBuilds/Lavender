@@ -16,7 +16,7 @@ import { useRequireAuth } from "@/hooks/query/auth";
 import { ModeToggle } from "../theme-toggle";
 
 const AppHeader = () => {
-    const { data, isPending } = useRequireAuth();
+    const { data } = useRequireAuth();
     const pathname = usePathname().split("/").filter(Boolean);
     return (
         <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b">
@@ -53,7 +53,7 @@ const AppHeader = () => {
             <div className="px-10 flex justify-center items-center">
                 <div className="flex justify-center items-center gap-2 bg-neutral-200 dark:bg-neutral-800 p-1 rounded-[30px] px-1.5">
                     <div className="flex justify-center items-center object-fill border-2 border-white rounded-full">
-                        <UserButton user={data?.user!} /></div>
+                        <UserButton user={data?.user ?? null} /></div>
                     <ModeToggle />
                 </div>
             </div>

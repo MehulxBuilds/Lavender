@@ -4,10 +4,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Clock, CheckCircle2, XCircle } from "lucide-react";
-import { getReviews } from "@/actions/review";
 import { formatDistanceToNow } from "date-fns";
 import { useReviews } from "@/hooks/query/review";
 import { RepositoryListSkeleton } from "@/components/repository/repository-list-skeleton";
+
+interface Review {
+    id: string;
+    prTitle: string;
+    status: string;
+    prNumber: number;
+    prUrl: string;
+    createdAt: string;
+    review: string;
+    repository: { fullName: string };
+}
 
 const ReviewsPage = () => {
     const { data: reviews, isPending, isError } = useReviews();
@@ -51,7 +61,7 @@ const ReviewsPage = () => {
                         </Card>
                     ) : (
                         <div className="grid gap-4">
-                            {reviews?.map((review: any) => (
+                            {reviews?.map((review: Review) => (
                                 <Card
                                     key={review.id}
                                     className="hover:shadow-md transition-shadow"
