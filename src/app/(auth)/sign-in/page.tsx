@@ -1,37 +1,127 @@
 "use client"
 
-import { Button } from '@/components/ui/button';
-import { signIn } from '@/lib/auth-client';
-import { Github } from 'lucide-react';
-import Link from 'next/link';
+import { Button } from "@/components/ui/button"
+import { signIn } from "@/lib/auth-client"
+import { ArrowRight, Github, ShieldCheck, Sparkles } from "lucide-react"
+import Link from "next/link"
 
 const LoginPage = () => {
+  return (
+    <main className="relative min-h-dvh overflow-hidden bg-[#050505] px-4 py-6 text-white sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-20 top-0 h-72 w-72 rounded-full bg-red-600/30 blur-3xl" />
+        <div className="absolute right-[-80px] top-16 h-80 w-80 rounded-full bg-red-500/20 blur-3xl" />
+        <div className="absolute bottom-[-120px] left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-red-700/20 blur-3xl" />
+      </div>
 
-    return (
-        <section className='flex min-h-screen bg-zinc-50 dark:bg-transparent px-4 py-16 md:py-32 '>
-            <div className='bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)] '>
-                <div className='p-8 pb-6'>
-                    <div>
-                        <Link href={"/"}>
-                            <h1 className='text-2xl font-bold'>Reliquary</h1>
-                        </Link>
-                        <h1 className='mb-1 mt-4 text-xl font-semibold'>Sign in to Reliquary</h1>
-                        <p className="text-sm">Welcome back! Sign in to continue</p>
-                    </div>
+      <section className="relative mx-auto flex w-full max-w-6xl items-center justify-center py-2 sm:py-6">
+        <div className="grid w-full overflow-hidden rounded-3xl border border-white/10 bg-black/75 shadow-[0_0_80px_-25px_rgba(239,68,68,0.65)] lg:grid-cols-2">
+          <aside className="relative hidden min-h-[620px] border-r border-white/10 bg-gradient-to-br from-red-700/30 via-red-900/15 to-black p-8 lg:flex lg:flex-col lg:justify-between">
+            <div className="space-y-6">
+              <Link href="/" className="inline-flex items-center gap-2">
+                <span className="rounded-lg border border-white/20 bg-black/50 p-2">
+                  <Sparkles className="h-4 w-4 text-red-300" />
+                </span>
+                <span className="text-lg font-semibold tracking-tight">Lavendar</span>
+              </Link>
 
-                    <div className='mt-6 grid grid-cols-1 gap-3'>
-                        <Button variant='outline' className='w-full' onClick={() => signIn.social({
-                            provider: 'github',
-                            callbackURL: "/"
-                        })}>
-                            <Github className='mr-2 h-4 w-4' />
-                            Sign in with Github
-                        </Button>
-                    </div>
-                </div>
+              <div>
+                <p className="mb-3 text-xs tracking-[0.24em] text-red-300 uppercase">
+                  AI Code Review Platform
+                </p>
+                <h1 className="text-4xl leading-tight font-semibold">
+                  Review Faster.
+                  <br />
+                  Ship Cleaner.
+                </h1>
+                <p className="mt-4 max-w-md text-sm leading-relaxed text-white/75">
+                  Automated pull request feedback, bug detection, and inline
+                  suggestions powered by Gemini, Inngest, PostgreSQL, and
+                  Pinecone.
+                </p>
+              </div>
             </div>
-        </section>
-    )
+
+            <div className="space-y-3">
+              <div className="rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white/80">
+                <span className="mr-2 text-red-300">01</span>
+                Connect GitHub and start reviewing instantly
+              </div>
+              <div className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/80">
+                <span className="mr-2 text-red-300">02</span>
+                AI analyzes every PR diff and comments contextually
+              </div>
+              <div className="rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/80">
+                <span className="mr-2 text-red-300">03</span>
+                Teams merge safer code with full audit visibility
+              </div>
+            </div>
+          </aside>
+
+          <div className="relative p-5 sm:p-8 lg:p-10">
+            <div className="mx-auto w-full max-w-md">
+              <Link href="/" className="inline-flex items-center gap-2 lg:hidden">
+                <span className="rounded-lg border border-white/20 bg-black/60 p-2">
+                  <Sparkles className="h-4 w-4 text-red-300" />
+                </span>
+                <span className="text-base font-semibold tracking-tight">Lavendar</span>
+              </Link>
+
+              <div className="mt-6 lg:mt-0">
+                <p className="text-xs tracking-[0.2em] text-red-300 uppercase">
+                  Welcome Back
+                </p>
+                <h2 className="mt-2 text-3xl font-semibold tracking-tight">
+                  Sign in to your account
+                </h2>
+                <p className="mt-3 text-sm text-white/70">
+                  Continue with GitHub to access your repositories and AI review
+                  workspace.
+                </p>
+              </div>
+
+              <div className="mt-8 space-y-4">
+                <Button
+                  className="h-11 w-full rounded-xl border border-white/15 bg-gradient-to-r from-red-700 to-red-800 text-white hover:brightness-140"
+                  onClick={() =>
+                    signIn.social({
+                      provider: "github",
+                      callbackURL: "/",
+                    })
+                  }
+                >
+                  <Github className="h-4 w-4" />
+                  Sign in with GitHub
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+
+                <div className="rounded-xl border border-white/10 bg-black/45 p-4">
+                  <p className="flex items-center gap-2 text-sm text-white/80">
+                    <ShieldCheck className="h-4 w-4 text-red-300" />
+                    Secure OAuth powered by Better Auth
+                  </p>
+                  <p className="mt-1 text-xs text-white/60">
+                    Session management, organization support, and role-based
+                    access are enabled after sign in.
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-8 text-center text-sm text-white/65">
+                New to Lavendar?{" "}
+                <Link
+                  href="/"
+                  className="font-medium text-red-300 transition hover:text-red-200"
+                >
+                  Explore the platform
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  )
 }
 
-export default LoginPage;
+export default LoginPage
