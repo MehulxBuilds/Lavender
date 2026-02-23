@@ -3,26 +3,28 @@ import { embed } from "ai";
 import { google } from "@ai-sdk/google";
 import client from "@/lib/db";
 import { getpullRequestDiff } from "./github";
-import { inngest } from "@/inngest/client";
-import { canCreateReview, incrementReviewCount } from "@/lib/subscription";
+// import { inngest } from "@/inngest/client";
+import { produceMessage } from "@/services/kafka";
+import { generateEmbedding } from "@/lib/open-router";
+// import { canCreateReview, incrementReviewCount } from "@/lib/subscription";
 
-export const generateEmbedding = async (text: string) => {
-    const { embedding } = await embed({
-        model: google.textEmbeddingModel("gemini-embedding-001"),
-        value: text,
-        providerOptions: {
-            google: {
-                outputDimensionality: 768,
-            },
-        },
-    });
+// export const generateEmbedding = async (text: string) => {
+//     const { embedding } = await embed({
+//         model: google.textEmbeddingModel("gemini-embedding-001"),
+//         value: text,
+//         providerOptions: {
+//             google: {
+//                 outputDimensionality: 768,
+//             },
+//         },
+//     });
 
-    if (embedding.length !== 768) {
-        throw new Error(`Invalid embedding dim: ${embedding.length}`);
-    }
+//     if (embedding.length !== 768) {
+//         throw new Error(`Invalid embedding dim: ${embedding.length}`);
+//     }
 
-    return embedding;
-};
+//     return embedding;
+// };
 
 export const indexCodebase = async (repoId: string, files: { path: string, content: string }[]) => {
     const vectors = [];
@@ -43,6 +45,8 @@ export const indexCodebase = async (repoId: string, files: { path: string, conte
                     content: truncatedContent
                 }
             });
+
+            console.log(embedding);
 
         } catch (error) {
             console.error(`Failed to embed ${file.path}:`, error);
@@ -101,11 +105,11 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
             throw new Error(`Repository ${owner}/${repo} not found in database, Please reconnect the repository.`);
         };
 
-        const canReview = await canCreateReview(repository.user.id, repository.id);
+        // const canReview = await canCreateReview(repository.user.id, repository.id);
 
-        if (!canReview) {
-            throw new Error(`Review limit reached for this repository. Please upgrade your plan to continue receiving reviews.`);
-        }
+        // if (!canReview) {
+        //     throw new Error(`Review limit reached for this repository. Please upgrade your plan to continue receiving reviews.`);
+        // }
 
         const githubAccount = repository?.user?.accounts?.[0];
 
@@ -117,17 +121,26 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
 
         await getpullRequestDiff(token, owner, repo, prNumber);
 
-        await inngest.send({
-            name: "pr.review.requested",
-            data: {
-                owner,
-                repo,
-                prNumber,
-                userId: repository.user.id,
-            }
+        // await inngest.send({
+        //     name: "pr.review.requested",
+        //     data: {
+        //         owner,
+        //         repo,
+        //         prNumber,
+        //         userId: repository.user.id,
+        //     }
+        // });
+
+        produceMessage("pr-review", `${owner}/${repo}-${prNumber}`, {
+            owner,
+            repo,
+            prNumber,
+            userId: repository.user.id,
+        }).catch(error => {
+            console.error("Failed to produce message to Kafka:", error);
         });
 
-        await incrementReviewCount(repository.user.id, repository.id);
+        // await incrementReviewCount(repository.user.id, repository.id);
 
         return {
             success: true,
