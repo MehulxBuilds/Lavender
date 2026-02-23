@@ -1,15 +1,16 @@
 import {
   Kafka,
+  type KafkaConfig,
   type Producer,
-  type Consumer,
   type EachMessagePayload,
   logLevel,
 } from "kafkajs";
 import fs from "fs";
+import { KafkaMessage } from "@/types";
 
-const kafkaConfig: any = {
+const kafkaConfig: KafkaConfig = {
   clientId: "lavender",
-  brokers: [process.env.KAFKA_BROKER],
+  brokers: [process.env.KAFKA_BROKER!],
   logLevel: logLevel.NOTHING,
 };
 
@@ -73,7 +74,7 @@ export const connectProducer = async () => {
 export const produceMessage = async (
   topic: string,
   key: string,
-  message: any,
+  message: KafkaMessage,
 ) => {
   if (!producer) {
     await connectProducer();
@@ -90,10 +91,10 @@ export const produceMessage = async (
 
 };
 
-export const startConsumer = async (
+export const startConsumer = async <T = unknown>(
   groupId: string,
   topic: string,
-  handleMessage: (message: any) => Promise<void>,
+  handleMessage: (message: T) => Promise<void>,
 ) => {
   const consumer = kafka.consumer({
     groupId,
@@ -108,7 +109,7 @@ export const startConsumer = async (
     await consumer.subscribe({ topic, fromBeginning: false });
 
     await consumer.run({
-      eachMessage: async ({ topic, partition, message }: EachMessagePayload) => {
+      eachMessage: async ({ message }: EachMessagePayload) => {
         const value = message.value?.toString();
         if (value) {
           try {

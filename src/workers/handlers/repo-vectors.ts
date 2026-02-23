@@ -1,12 +1,9 @@
 import { getRepoFileContents } from "@/actions/github";
 import { indexCodebase } from "@/actions/rag";
 import client from "@/lib/db";
+import { RepoVectorMessage } from "@/types";
 
-export const handleCreateRepoVectors = async (message: {
-  owner: string;
-  repo: string;
-  userId: string;
-}) => {
+  export const handleCreateRepoVectors = async (message: RepoVectorMessage) => {
   const { owner, repo, userId } = message;
 
   console.log(`[repo-vectors] Indexing repository: ${owner}/${repo}`);

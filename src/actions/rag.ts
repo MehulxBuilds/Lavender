@@ -1,6 +1,6 @@
 import { pineconeIndex } from "@/lib/pinecone";
-import { embed } from "ai";
-import { google } from "@ai-sdk/google";
+// import { embed } from "ai";
+// import { google } from "@ai-sdk/google";
 import client from "@/lib/db";
 import { getpullRequestDiff } from "./github";
 // import { inngest } from "@/inngest/client";

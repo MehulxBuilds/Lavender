@@ -6,7 +6,9 @@
     "dev": "next dev",
     "dev:docker": "docker compose up -d && next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint",
+    "preinstall": "prisma generate && next build"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.6",

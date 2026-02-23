@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import client from "@/lib/db";
 import { createWebhook, getRepository } from "./github";
 import { headers } from "next/headers";
-import { inngest } from "@/inngest/client";
+// import { inngest } from "@/inngest/client";
 import { produceMessage } from "@/services/kafka";
 // import { canConnectRepository, incrementRepositoryCount } from "@/lib/subscription";
 
@@ -84,7 +84,7 @@ export const connectRepository = async (owner: string, repo: string, githubId: n
             }).catch(error => {
                 console.error("Failed to produce message to Kafka:", error);
             });
-            
+
         } catch (e) {
             console.error("Failed to trigger repository indexing:", e);
         }

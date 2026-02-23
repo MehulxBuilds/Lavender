@@ -1,10 +1,7 @@
 import client from "@/lib/db";
+import { DBWriterMessage } from "@/types";
 
-export const handleDBWrite = async (message: {
-  owner: string;
-  repo: string;
-  userId: string;
-}) => {
+export const handleDBWrite = async (message: DBWriterMessage) => {
   const { owner, repo, userId } = message;
 
   console.log(`[db-writer] Processing repository: ${owner}/${repo}`);

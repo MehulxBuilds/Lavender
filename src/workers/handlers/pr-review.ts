@@ -2,14 +2,10 @@ import { getpullRequestDiff, postReviewComment } from "@/actions/github";
 import { retriveContext } from "@/actions/rag";
 import client from "@/lib/db";
 import { generateText } from "@/lib/open-router";
+import { PrReviewMessage } from "@/types";
 // import { google } from "@ai-sdk/google";
 
-export const handlePrReviewTOGithub = async (message: {
-  owner: string;
-  repo: string;
-  prNumber: number;
-  userId: string;
-}) => {
+export const handlePrReviewTOGithub = async (message: PrReviewMessage) => {
   const { owner, repo, prNumber, userId } = message;
 
   console.log(`[pr-review] Processing PR #${prNumber} for ${owner}/${repo}`);
