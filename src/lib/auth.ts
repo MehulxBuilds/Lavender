@@ -22,81 +22,81 @@ export const auth = betterAuth({
 
     trustedOrigins: [process.env.NEXT_PUBLIC_APP_BASE_URL!],
 
-    plugins: [
-        polar({
-            client: polarClient,
-            createCustomerOnSignUp: true,
-            use: [
-                checkout({
-                    products: [
-                        {
-                            productId: "d777e3e8-fc3a-46db-94ff-0282b391d053",
-                            slug: "pro", // Custom slug for easy reference in Checkout URL, e.g. /checkout/a-new-saas
-                        },
-                    ],
-                    successUrl: process.env.POLAR_SUCCESS_URL || "/dashboard/subscription?success=true",
-                    authenticatedUsersOnly: true,
-                }),
-                portal({
-                    returnUrl: process.env.PORTAL_RETURN_URL || "http://localhost:3000/dashboard",
-                }),
-                usage(),
-                webhooks({
-                    secret: process.env.POLAR_WEBHOOK_SECRET!,
-                    onSubscriptionActive: async (payload) => {
-                        const customerId = payload.data.customerId;
+    // plugins: [
+    //     polar({
+    //         client: polarClient,
+    //         createCustomerOnSignUp: true,
+    //         use: [
+    //             checkout({
+    //                 products: [
+    //                     {
+    //                         productId: "d777e3e8-fc3a-46db-94ff-0282b391d053",
+    //                         slug: "pro", // Custom slug for easy reference in Checkout URL, e.g. /checkout/a-new-saas
+    //                     },
+    //                 ],
+    //                 successUrl: process.env.POLAR_SUCCESS_URL || "/dashboard/subscription?success=true",
+    //                 authenticatedUsersOnly: true,
+    //             }),
+    //             portal({
+    //                 returnUrl: process.env.PORTAL_RETURN_URL || "http://localhost:3000/dashboard",
+    //             }),
+    //             usage(),
+    //             webhooks({
+    //                 secret: process.env.POLAR_WEBHOOK_SECRET!,
+    //                 onSubscriptionActive: async (payload) => {
+    //                     const customerId = payload.data.customerId;
 
-                        const user = await client.user.findUnique({
-                            where: {
-                                polarCustomerId: customerId,
-                            }
-                        })
+    //                     const user = await client.user.findUnique({
+    //                         where: {
+    //                             polarCustomerId: customerId,
+    //                         }
+    //                     })
 
-                        if (user) {
-                            return updateUserTier(user.id, "PRO", "ACTIVE", payload.data.id);
-                        }
-                    },
-                    onSubscriptionCanceled: async (payload) => {
-                        const customerId = payload.data.customerId;
+    //                     if (user) {
+    //                         return updateUserTier(user.id, "PRO", "ACTIVE", payload.data.id);
+    //                     }
+    //                 },
+    //                 onSubscriptionCanceled: async (payload) => {
+    //                     const customerId = payload.data.customerId;
 
-                        const user = await client.user.findUnique({
-                            where: {
-                                polarCustomerId: customerId,
-                            }
-                        })
+    //                     const user = await client.user.findUnique({
+    //                         where: {
+    //                             polarCustomerId: customerId,
+    //                         }
+    //                     })
 
-                        if (user) {
-                            return updateUserTier(user.id, user.subscriptionTier as SubscriptionTier, "CANCELED");
-                        }
-                    },
-                    onSubscriptionRevoked: async (payload) => {
-                        const customerId = payload.data.customerId;
+    //                     if (user) {
+    //                         return updateUserTier(user.id, user.subscriptionTier as SubscriptionTier, "CANCELED");
+    //                     }
+    //                 },
+    //                 onSubscriptionRevoked: async (payload) => {
+    //                     const customerId = payload.data.customerId;
 
-                        const user = await client.user.findUnique({
-                            where: {
-                                polarCustomerId: customerId,
-                            }
-                        })
+    //                     const user = await client.user.findUnique({
+    //                         where: {
+    //                             polarCustomerId: customerId,
+    //                         }
+    //                     })
 
-                        if (user) {
-                            return updateUserTier(user.id, "FREE", "EXPIRED");
-                        }
-                    },
-                    onOrderPaid: async () => { },
-                    onCustomerCreated: async (payload) => {
-                        const user = await client.user.findUnique({
-                            where: {
-                                email: payload.data.email,
-                            }
-                        })
+    //                     if (user) {
+    //                         return updateUserTier(user.id, "FREE", "EXPIRED");
+    //                     }
+    //                 },
+    //                 onOrderPaid: async () => { },
+    //                 onCustomerCreated: async (payload) => {
+    //                     const user = await client.user.findUnique({
+    //                         where: {
+    //                             email: payload.data.email,
+    //                         }
+    //                     })
 
-                        if (user) {
-                            return updatePolarCustomerId(user.id, payload.data.id);
-                        }
-                    },
-                })
-            ],
-        }),
-    ],
+    //                     if (user) {
+    //                         return updatePolarCustomerId(user.id, payload.data.id);
+    //                     }
+    //                 },
+    //             })
+    //         ],
+    //     }),
+    // ],
 });
 

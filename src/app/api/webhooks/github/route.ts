@@ -3,7 +3,14 @@ import { NextResponse, NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
-        const body = await req.json();
+        const text = await req.text();
+
+        if (!text) {
+            return new Response("ok");
+        }
+
+        const body = JSON.parse(text);
+
         const event = req.headers.get("x-github-event");
 
         if (event === "ping") {
@@ -29,7 +36,7 @@ export async function POST(req: NextRequest) {
                     .catch((err: unknown) => {
                         console.error(`Review Failed PR ${repo} #${prNumber}:`, err);
                     }
-                );
+                    );
             }
         };
 
