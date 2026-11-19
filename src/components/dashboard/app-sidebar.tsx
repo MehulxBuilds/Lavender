@@ -39,10 +39,6 @@ const data = {
           url: "/dashboard/reviews",
         },
         {
-          title: "Subscription",
-          url: "/dashboard/subscription",
-        },
-        {
           title: "Settings",
           url: "/dashboard/settings",
         },

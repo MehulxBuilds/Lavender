@@ -3,8 +3,7 @@
 ![Next JS](https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
-![Inngest](https://img.shields.io/badge/Inngest-000000?style=for-the-badge&logo=inngest.com&logoColor=white)
-![Polar.sh](https://img.shields.io/badge/Polar.sh-0A0A0A?style=for-the-badge&logo=polar.sh&logoColor=white)
+![BullMQ](https://img.shields.io/badge/BullMQ-000000?style=for-the-badge&logo=bullmq.io&logoColor=white)
 ![Better Auth](https://img.shields.io/badge/Better_Auth-0A0A0A?style=for-the-badge&logo=better-auth&logoColor=white)
 
 > Friend that Cuts code review time & bugs in half Instantly.
@@ -16,7 +15,7 @@
 | :------------------ | :------------------------------------------------------------- |
 | **Core**            | NextJs, TypeScript                                             |
 | **Database**        | PostgreSQL (Prisma ORM), Pinecone (Vector DB)                  |
-| **BackGround-Jobs** | Inngest Dev (Inngest)                                          |
+| **BackGround-Jobs** | BullMQ Dev (BullMQ)                                          |
 | **Authentication**  | Better-Auth (Google, GitHub, Facebook)                         |
 | **AI & ML**         | Google Gemini (GenAI), Pinecone SDK                            |
 | **Utilities**       | Zod (Validation), Nodemailer (Email), Nanoid                   |
@@ -26,7 +25,7 @@
 
 Lavendar is an AI-powered code review platform, similar to CodeRabbit, that automatically analyzes pull requests, suggests improvements, detects bugs, and improves overall code quality — seamlessly integrated into your developer workflow.
 
-Built with **Next.js, Inngest, Better Auth, TypeScript, Google Gemini, Polar.sh, PostgreSQL, and Pinecone**.
+Built with **Next.js, BullMQ, Better Auth, TypeScript, Google Gemini, PostgreSQL, and Pinecone**.
 
 
 ## 🌟 Comprehensive Features
@@ -50,10 +49,10 @@ Built with **Next.js, Inngest, Better Auth, TypeScript, Google Gemini, Polar.sh,
 
 ---
 
-### ⚡ Event-Driven Workflows (Inngest)
+### ⚡ Event-Driven Workflows (BullMQ)
 
 - **Webhook Processing**: Git provider events trigger async workflows.
-- **Background AI Pipelines**: PR opened → Inngest function → AI analysis → Store results.
+- **Background AI Pipelines**: PR opened → BullMQ function → AI analysis → Store results.
 - **Retry & Failure Handling**: Durable event execution with automatic retries.
 - **Scalable Architecture**: Handles high-volume pull requests efficiently.
 
@@ -67,13 +66,6 @@ Built with **Next.js, Inngest, Better Auth, TypeScript, Google Gemini, Polar.sh,
 
 ---
 
-### 💳 Billing & Subscriptions (Polar.sh)
-
-- **Subscription Management**: Team and enterprise pricing tiers.
-- **Usage-Based Billing**: Pay based on AI review volume.
-- **Secure Checkout**: Seamless payment handling and subscription lifecycle management.
-
----
 
 ### 🗄️ Database & Persistence (PostgreSQL)
 
@@ -94,14 +86,14 @@ Built with **Next.js, Inngest, Better Auth, TypeScript, Google Gemini, Polar.sh,
 
 ## 🏗️ Architecture Deep Dive
 
-Lavendar follows a **Modular Monolith** architecture where core domains (Auth, Billing, AI Review, Organizations) live in the same codebase but communicate via structured event flows.
+Lavendar follows a **Modular Monolith** architecture where core domains (Auth, AI Review, Organizations) live in the same codebase but communicate via structured event flows.
 
 ---
 
 ## 🔄 Data Flow for AI Code Review
 
 1. **Trigger**: Pull Request opened/updated → Webhook received.
-2. **Event Dispatch**: Webhook event → Inngest workflow triggered.
+2. **Event Dispatch**: Webhook event → BullMQ workflow triggered.
 3. **Processing**: Code diff sent to Google Gemini → AI generates feedback.
 4. **Storage**: Review results saved to PostgreSQL + embeddings stored in Pinecone.
 5. **Delivery**: Feedback displayed inside Lavendar dashboard or posted back to the Git provider.
@@ -113,10 +105,9 @@ Lavendar follows a **Modular Monolith** architecture where core domains (Auth, B
 - **Frontend**: Next.js + TypeScript  
 - **Auth**: Better Auth  
 - **AI Engine**: Google Gemini  
-- **Workflow Engine**: Inngest  
+- **Workflow Engine**: BullMQ
 - **Database**: PostgreSQL  
 - **Vector Database**: Pinecone  
-- **Billing**: Polar.sh  
 
 ---
 
@@ -137,8 +128,7 @@ Lavendar follows a **Modular Monolith** architecture where core domains (Auth, B
 - NextJs v16.0.10
 - PostgreSQL
 - Better-Auth
-- Inngest
-- Polar.sh
+- BullMQ
 
 ### 2. Installation
 
@@ -164,9 +154,6 @@ PINECONE_DB_API_KEY="..."
 PINECONE_DB_REGION="..."
 PINECONE_DB_INDEX_NAME="..."
 GOOGLE_GENERATIVE_AI_API_KEY="..."
-POLAR_ACCESS_TOKEN="..."
-POLAR_SUCCESS_URL="..."
-POLAR_WEBHOOK_SECRET="..."
 ```
 
 ### 4. Database Setup
@@ -179,12 +166,29 @@ npx prisma generate
 npx prisma db push
 ```
 
-### 5. Running the Inngest Dev Server
+### 5. Running the BullMQ Workers
+
+Set `REDIS_URL` in `.env` to your Upstash TCP connection URL
+(`rediss://default:PASSWORD@your-database.upstash.io:6379`). The `rediss://`
+scheme enables TLS. BullMQ only uses `REDIS_URL`; your existing
+`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` can remain in `.env`.
+
+Run the workers in a separate terminal alongside Next.js:
 
 ```bash
-# Start Inngest dev server
-npx --ignore-scripts=false inngest-cli@latest dev
+bun run worker
+# Restart workers on file changes:
+bun run worker:dev
 ```
+
+Deploy `bun run worker` as a persistent background process alongside the web app.
+Workers no longer start inside Next.js instrumentation. Repository events atomically
+create database and vector indexing jobs, each with three attempts and exponential
+backoff. PR review jobs have one attempt to limit duplicate GitHub comments;
+BullMQ may still redeliver stalled jobs, so delivery is at least once.
+Completed and failed job history is bounded. Existing Kafka backlog is not migrated.
+Disable Redis eviction for the queue database. BullMQ polls Redis even when idle;
+account for this in your Upstash plan.
 
 ### 6. Running the Application
 
@@ -208,8 +212,7 @@ npm start
 
 ### ⚡ Event & Background Processing
 
-- `POST /api/inngest`  
-  Inngest event endpoint for handling background workflows (PR analysis, AI review jobs, retries).
+- GitHub webhooks enqueue PR review jobs in Redis; the dedicated BullMQ worker processes them.
 
 ---
 
@@ -221,11 +224,5 @@ npm start
   Receives GitHub webhook events (Pull Request opened, updated, synchronized).  
   Triggers AI code review workflows.
 
-#### 💳 Polar.sh
-
-- `POST /api/webhooks/polar`  
-  Handles subscription lifecycle events (checkout completed, subscription updated, canceled).  
-  Syncs billing status with user accounts.
 
   ---
-

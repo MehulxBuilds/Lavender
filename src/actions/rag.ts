@@ -3,10 +3,9 @@ import { pineconeIndex } from "@/lib/pinecone";
 // import { google } from "@ai-sdk/google";
 import client from "@/lib/db";
 import { getpullRequestDiff } from "./github";
-// import { inngest } from "@/inngest/client";
-import { produceMessage } from "@/services/kafka";
+
+import { enqueuePrReview } from "@/services/queue";
 import { generateEmbedding } from "@/lib/open-router";
-// import { canCreateReview, incrementReviewCount } from "@/lib/subscription";
 
 // export const generateEmbedding = async (text: string) => {
 //     const { embedding } = await embed({
@@ -105,11 +104,6 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
             throw new Error(`Repository ${owner}/${repo} not found in database, Please reconnect the repository.`);
         };
 
-        // const canReview = await canCreateReview(repository.user.id, repository.id);
-
-        // if (!canReview) {
-        //     throw new Error(`Review limit reached for this repository. Please upgrade your plan to continue receiving reviews.`);
-        // }
 
         const githubAccount = repository?.user?.accounts?.[0];
 
@@ -121,26 +115,14 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
 
         await getpullRequestDiff(token, owner, repo, prNumber);
 
-        // await inngest.send({
-        //     name: "pr.review.requested",
-        //     data: {
-        //         owner,
-        //         repo,
-        //         prNumber,
-        //         userId: repository.user.id,
-        //     }
-        // });
 
-        produceMessage("pr-review", `${owner}/${repo}-${prNumber}`, {
+        await enqueuePrReview({
             owner,
             repo,
             prNumber,
             userId: repository.user.id,
-        }).catch(error => {
-            console.error("Failed to produce message to Kafka:", error);
         });
 
-        // await incrementReviewCount(repository.user.id, repository.id);
 
         return {
             success: true,

@@ -1,6 +1,0 @@
-[[plugins]]
-package = "netlify-plugin-inngest"
-
-  [plugins.inputs]
-    host = "https://lavender-build.netlify.app"
-    path = "/api/inngest"

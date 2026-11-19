@@ -4,14 +4,13 @@ import { GithubIcon, Leaf } from "lucide-react";
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-const navItems = ["About", "Features", "Workflow", "Pricing", "FAQ"]
+const navItems = ["About", "Features", "Workflow", "FAQ"]
 
 const partnerBadges = [
   "GitHub Ready",
   "Google Gemini",
-  "Kafka",
+  "BullMQ",
   "Pinecone",
-  "Polar.sh",
 ]
 
 const whyNot = [
@@ -40,11 +39,6 @@ const faqs = [
     question: "Can Lavendar post feedback back to GitHub?",
     answer:
       "Yes. Review output is sent directly as GitHub pull request comments so your team can triage issues without leaving its existing workflow.",
-  },
-  {
-    question: "How does usage-based billing work with Polar.sh?",
-    answer:
-      "Usage is metered by review activity and billed through Polar.sh based on your selected plan, with billing data tracked against your workspace usage.",
   },
   {
     question: "Is organization-level RBAC supported?",

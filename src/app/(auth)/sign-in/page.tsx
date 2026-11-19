@@ -36,7 +36,7 @@ const LoginPage = () => {
                 </h1>
                 <p className="mt-4 max-w-md text-sm leading-relaxed text-white/75">
                   Automated pull request feedback, bug detection, and inline
-                  suggestions powered by Gemini, Inngest, PostgreSQL, and
+                  suggestions powered by Gemini, BullMQ, PostgreSQL, and
                   Pinecone.
                 </p>
               </div>
