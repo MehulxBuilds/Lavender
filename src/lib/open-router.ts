@@ -27,7 +27,7 @@ export const generateEmbedding = async (text: string) => {
             model: env.OPENROUTER_EMBEDDING_MODEL_ID,
             input: text,
             encodingFormat: "float",
-            dimensions: 768,
+            dimensions: 2048,
         }
     });
 
