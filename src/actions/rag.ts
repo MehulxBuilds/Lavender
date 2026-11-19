@@ -1,82 +1,18 @@
 import { enforceRateLimit, RateLimitError, RateLimitUnavailableError } from "@/lib/rate-limit";
-import { pineconeIndex } from "@/lib/pinecone";
-// import { embed } from "ai";
-// import { google } from "@ai-sdk/google";
+import { indexRepositoryFiles, searchRepositoryContext } from "@/lib/pinecone";
 import client from "@/lib/db";
 import { getpullRequestDiff } from "./github";
-
 import { enqueuePrReview } from "@/services/queue";
-import { generateEmbedding } from "@/lib/open-router";
 
-// export const generateEmbedding = async (text: string) => {
-//     const { embedding } = await embed({
-//         model: google.textEmbeddingModel("gemini-embedding-001"),
-//         value: text,
-//         providerOptions: {
-//             google: {
-//                 outputDimensionality: 768,
-//             },
-//         },
-//     });
-
-//     if (embedding.length !== 768) {
-//         throw new Error(`Invalid embedding dim: ${embedding.length}`);
-//     }
-
-//     return embedding;
-// };
-
-export const indexCodebase = async (repoId: string, files: { path: string, content: string }[]) => {
-    const vectors = [];
-
-    for (const file of files) {
-        const content = `File: ${file.path}\n\n${file.content}`;
-        const truncatedContent = content.slice(0, 8000); 
-
-        try {
-            const embedding = await generateEmbedding(truncatedContent);
-
-            vectors.push({
-                id: `${repoId}-${file.path.replace(/\//g, '_')}`,
-                values: embedding,
-                metadata: {
-                    repoId,
-                    path: file.path,
-                    content: truncatedContent
-                }
-            });
-
-            console.log(embedding);
-
-        } catch (error) {
-            console.error(`Failed to embed ${file.path}:`, error);
-        }
-    };
-
-    if (vectors.length > 0) {
-        const batchSize = 100;
-
-        for (let i = 0; i < vectors.length; i += batchSize) {
-            const batch = vectors.slice(i, i + batchSize);
-
-            await pineconeIndex.upsert(batch);
-        }
-    };
-
-    console.log("Indexing complete");
+export const indexCodebase = async (repoId: string, files: { path: string; content: string }[]) => {
+    // Propagate failures to BullMQ rather than reporting a partially indexed repo as successful.
+    const indexed = await indexRepositoryFiles(repoId, files);
+    console.log(`Indexing complete: ${indexed} files`);
+    return indexed;
 };
 
 export const retriveContext = async (query: string, repoId: string, topK: number = 5) => {
-    const embedding = await generateEmbedding(query);
-
-    const results = await pineconeIndex.query({
-        vector: embedding,
-        filter: { repoId },
-        topK,
-        includeMetadata: true,
-    });
-
-    return results.matches.map(match => match?.metadata?.content as string).filter(Boolean);
+    return searchRepositoryContext(query, repoId, topK);
 };
 
 export const reviewPullRequest = async (owner: string, repo: string, prNumber: number) => {

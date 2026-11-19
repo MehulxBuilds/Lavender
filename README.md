@@ -257,3 +257,19 @@ Webhook rejections return HTTP 429 with `Retry-After`; server actions throw an e
 Limiter outages reject requests (HTTP 503 for routes) rather than bypassing limits.
 Rejected review requests do not create failed review records.
 Background workers are not throttled.
+
+### Pinecone index compatibility
+
+The app uses Pinecone's TypeScript SDK v9 and reads the index schema before
+indexing or searching. Named dense vector fields use the Documents API with
+OpenRouter embeddings (2048 dimensions). Document fields with integrated
+embedding use Pinecone's configured model for both writes and search queries;
+they do not call OpenRouter's embedding endpoint. Legacy integrated indexes
+use the SDK Records API. Index fields, embedding dimensions, document metadata,
+and returned content are validated with Zod.
+No index is created, deleted, or reconfigured automatically.
+
+The external embedding length must match the configured dense field dimension.
+All modes retain repository filters and source content for review context.
+Indexing failures propagate to BullMQ for retry, rather than reporting success.
+After deployment, reindex repositories that previously failed to index.
