@@ -173,16 +173,28 @@ Set `REDIS_URL` in `.env` to your Upstash TCP connection URL
 scheme enables TLS. BullMQ only uses `REDIS_URL`; your existing
 `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` can remain in `.env`.
 
-Run the workers in a separate terminal alongside Next.js:
+`src/instrumentation.ts` starts BullMQ automatically alongside Next.js in the
+Node.js runtime. Startup is shared per process, and workers are skipped during
+`next build`. Run `bun run dev` locally; no separate worker command is needed.
 
-```bash
-bun run worker
-# Restart workers on file changes:
-bun run worker:dev
-```
+On Render, create one paid, always-on **Web Service** from this repository:
 
-Deploy `bun run worker` as a persistent background process alongside the web app.
-Workers no longer start inside Next.js instrumentation. Repository events atomically
+- Build command: `bun install --frozen-lockfile && bun run build`
+- Start command: `NEXT_MANUAL_SIG_HANDLE=true node node_modules/next/dist/bin/next start --hostname 0.0.0.0 --port $PORT`
+- Set Node.js 22 or newer and Bun 1.3.5 or newer in Render's environment settings.
+- Add the environment values listed in `.env.example`.
+- Set `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_BASE_URL` to the deployed URL.
+- Update GitHub's OAuth callback to `<APP_URL>/api/auth/callback/github`.
+- Apply pending migrations with `bunx prisma migrate deploy` before serving production traffic.
+
+The start command enables Next.js manual signal handling so embedded workers
+can close on SIGTERM/SIGINT. Shutdown waits up to 25 seconds for active jobs,
+within Render's default 30-second grace period. Interrupted jobs may be
+redelivered, so duplicate side effects remain possible. Each scaled web instance
+starts its own workers; BullMQ distributes jobs among them. Free Render web
+services sleep when idle and are unsuitable for continuous processing.
+
+Repository events atomically
 create database and vector indexing jobs, each with three attempts and exponential
 backoff. PR review jobs have one attempt to limit duplicate GitHub comments;
 BullMQ may still redeliver stalled jobs, so delivery is at least once.
