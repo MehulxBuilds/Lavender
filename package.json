@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "worker": "tsx src/workers/run.ts",
-    "worker:dev": "tsx watch src/workers/run.ts"
+    "worker:dev": "tsx watch src/workers/run.ts",
+    "preinstall": "prisma generate && next build"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.6",
@@ -47,6 +48,7 @@
     "@t3-oss/env-nextjs": "^0.13.11",
     "@tanstack/react-query": "^5.90.14",
     "@types/pg": "^8.16.0",
+    "@upstash/ratelimit": "^2.2.1",
     "@upstash/redis": "^1.41.0",
     "activity-calendar": "^0.0.15",
     "ai": "^6.0.25",

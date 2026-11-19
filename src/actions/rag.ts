@@ -1,3 +1,4 @@
+import { enforceRateLimit, RateLimitError, RateLimitUnavailableError } from "@/lib/rate-limit";
 import { pineconeIndex } from "@/lib/pinecone";
 // import { embed } from "ai";
 // import { google } from "@ai-sdk/google";
@@ -105,6 +106,8 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
         };
 
 
+        await enforceRateLimit("prReview", repository.user.id);
+
         const githubAccount = repository?.user?.accounts?.[0];
 
         if (!githubAccount?.accessToken) {
@@ -130,6 +133,7 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
         }
 
     } catch (e) {
+        if (e instanceof RateLimitError || e instanceof RateLimitUnavailableError) throw e;
         try {
             const repository = await client.repository.findFirst({
                 where: {
@@ -153,5 +157,6 @@ export const reviewPullRequest = async (owner: string, repo: string, prNumber: n
         } catch (e) {
             console.error("Failed to log review error in database:", e);
         }
+        throw e;
     }
 };

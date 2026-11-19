@@ -226,3 +226,22 @@ npm start
 
 
   ---
+
+### Request rate limits
+
+Rate limits use the existing Upstash REST credentials and atomic Redis sliding
+windows shared across app instances. BullMQ continues to use the TCP `REDIS_URL`.
+
+| Operation | Limit | Scope |
+| --- | --- | --- |
+| Connect repository | 5 per hour | Authenticated user |
+| List GitHub repositories | 30 per minute | Authenticated user |
+| Queue PR review | 10 per 10 minutes | Repository owner |
+
+Policies are configured in `src/lib/rate-limit.ts` using `@upstash/ratelimit`.
+Each operation has its own SDK instance with dynamic limits enabled.
+Authentication endpoints have no rate limits, including Better Auth's built-in limiter.
+Webhook rejections return HTTP 429 with `Retry-After`; server actions throw an error.
+Limiter outages reject requests (HTTP 503 for routes) rather than bypassing limits.
+Rejected review requests do not create failed review records.
+Background workers are not throttled.

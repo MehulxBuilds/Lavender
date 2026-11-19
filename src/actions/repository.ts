@@ -1,5 +1,6 @@
 "use server";
 
+import { enforceRateLimit } from "@/lib/rate-limit";
 import { auth } from "@/lib/auth";
 import client from "@/lib/db";
 import { createWebhook, getRepository } from "./github";
@@ -15,6 +16,8 @@ export const fetchRepositories = async (page: number = 1, perPage = 10) => {
     if (!session) {
         throw new Error("Unauthorized");
     };
+
+    await enforceRateLimit("repositoryList", session.user.id);
 
     const githubRepos = await getRepository(page, perPage);
 
@@ -41,6 +44,8 @@ export const connectRepository = async (owner: string, repo: string, githubId: n
         throw new Error("Unauthorized");
     };
 
+
+    await enforceRateLimit("repositoryConnect", session.user.id);
 
     const webhook = await createWebhook(owner, repo);
 

@@ -1,3 +1,4 @@
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { reviewPullRequest } from "@/actions/rag";
 import { NextResponse, NextRequest } from "next/server";
 
@@ -29,14 +30,7 @@ export async function POST(req: NextRequest) {
             const [owner, repoName] = repo.split("/");
 
             if (action === "opened" || action === "synchronize") {
-                reviewPullRequest(owner, repoName, prNumber)
-                    .then(() => {
-                        console.log(`Review completed for ${repo} #${prNumber}`);
-                    })
-                    .catch((err: unknown) => {
-                        console.error(`Review Failed PR ${repo} #${prNumber}:`, err);
-                    }
-                    );
+                await reviewPullRequest(owner, repoName, prNumber);
             }
         };
 
@@ -48,6 +42,8 @@ export async function POST(req: NextRequest) {
             status: 200
         });
     } catch (e) {
+        const limited = rateLimitResponse(e);
+        if (limited) return limited;
         console.error(e);
         return NextResponse.json({
             error: "internal server error",
