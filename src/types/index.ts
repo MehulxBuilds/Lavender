@@ -16,6 +16,3 @@ export interface PrReviewMessage {
     prNumber: number;
     userId: string;
 }
-
-export type KafkaMessage = DBWriterMessage | RepoVectorMessage | PrReviewMessage;
-

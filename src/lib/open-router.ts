@@ -1,13 +1,14 @@
+import { env } from "@/lib/env";
 import { OpenRouter } from "@openrouter/sdk";
 
 const openrouter = new OpenRouter({
-    apiKey: process.env.OPENROUTER_API_KEY
+    apiKey: env.OPENROUTER_API_KEY
 });
 
 export const generateText = async (prompt: string) => {
     const result = await openrouter.chat.send({
         chatGenerationParams: {
-            model: "arcee-ai/trinity-mini:free",
+            model: env.OPENROUTER_TEXT_MODEL_ID,
             messages: [
                 {
                     role: "user",
@@ -23,7 +24,7 @@ export const generateText = async (prompt: string) => {
 export const generateEmbedding = async (text: string) => {
     const embedding = await openrouter.embeddings.generate({
         requestBody: {
-            model: "qwen/qwen3-embedding-8b",
+            model: env.OPENROUTER_EMBEDDING_MODEL_ID,
             input: text,
             encodingFormat: "float",
             dimensions: 768,

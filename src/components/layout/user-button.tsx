@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { LogOut, Settings, CreditCard, User as UserIcon } from "lucide-react";
+import { LogOut, Settings, User as UserIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
@@ -30,7 +30,6 @@ interface UserButtonProps {
     user: UserData | null;
     onSettings?: () => void;
     onProfile?: () => void;
-    onBilling?: () => void;
     showBadge?: boolean;
     badgeText?: string;
     badgeVariant?: "default" | "secondary" | "destructive" | "outline";
@@ -43,7 +42,6 @@ export default function UserButton({
     user,
     onSettings,
     onProfile,
-    onBilling,
     showBadge = false,
     badgeText = "Pro",
     badgeVariant = "default",
@@ -184,13 +182,6 @@ export default function UserButton({
                     <DropdownMenuItem onClick={onProfile} className="cursor-pointer">
                         <UserIcon className="mr-2 h-4 w-4" />
                         Profile
-                    </DropdownMenuItem>
-                )}
-
-                {onBilling && (
-                    <DropdownMenuItem onClick={onBilling} className="cursor-pointer">
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Billing
                     </DropdownMenuItem>
                 )}
 
